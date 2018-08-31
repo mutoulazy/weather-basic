@@ -15,9 +15,7 @@ import com.waylau.spring.cloud.weather.vo.WeatherResponse;
 
 /**
  * Weather Controller.
- *
- * @author <a href="https://waylau.com">Way Lau</a>
- * @since 1.0.0 2017年11月22日
+ * 加入swagger2
  */
 @Api(value = "WeatherController", description = "查询城市天气json数据接口")
 @RestController

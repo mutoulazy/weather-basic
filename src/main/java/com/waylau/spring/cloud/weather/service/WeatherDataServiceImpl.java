@@ -2,7 +2,12 @@ package com.waylau.spring.cloud.weather.service;
 
 import java.io.IOException;
 
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,16 +17,18 @@ import com.waylau.spring.cloud.weather.vo.WeatherResponse;
 
 /**
  * WeatherDataService 实现.
- * 
- * @since 1.0.0 2017年11月22日
- * @author <a href="https://waylau.com">Way Lau</a> 
+ * 加入redis缓存
  */
 @Service
 public class WeatherDataServiceImpl implements WeatherDataService {
+	private final static Logger logger = LoggerFactory.getLogger(WeatherDataServiceImpl.class);
 	private static final String WEATHER_URI = "http://wthrcdn.etouch.cn/weather_mini?";
+	private static final long TIME_OUT = 1800L; // 1800s
 	
 	@Autowired
 	private RestTemplate restTemplate;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 	
 	@Override
 	public WeatherResponse getDataByCityId(String cityId) {
@@ -34,22 +41,40 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 		String uri = WEATHER_URI + "city=" + cityName;
 		return this.doGetWeahter(uri);
 	}
-	
+
+	/**
+	 * 通过url从天气接口获取天气json数据，并添加本地缓存
+	 * @param uri
+	 * @return
+	 */
 	private WeatherResponse doGetWeahter(String uri) {
- 		ResponseEntity<String> respString = restTemplate.getForEntity(uri, String.class);
-		
+		String key = uri;
 		ObjectMapper mapper = new ObjectMapper();
 		WeatherResponse resp = null;
 		String strBody = null;
-		
-		if (respString.getStatusCodeValue() == 200) {
-			strBody = respString.getBody();
+		ValueOperations<String, String> ops = stringRedisTemplate.opsForValue();
+
+		// 先检测缓存，有缓存就直接在缓存中取数据
+		if (stringRedisTemplate.hasKey(key)) {
+			logger.debug("从redis缓存中获取数据");
+			strBody = ops.get(key);
+		} else {
+			logger.debug("redis 中没有缓存，从接口取数据存入缓存");
+			ResponseEntity<String> respString = restTemplate.getForEntity(uri, String.class);
+
+			// 从接口中获取数据
+			if (respString.getStatusCodeValue() == 200) {
+				strBody = respString.getBody();
+			}
+
+			// 添加进入redis缓存中
+			ops.set(uri, strBody, TIME_OUT, TimeUnit.SECONDS);
 		}
 
 		try {
 			resp = mapper.readValue(strBody, WeatherResponse.class);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("转换成天气接收类失败", e);
 		}
 		
 		return resp;
