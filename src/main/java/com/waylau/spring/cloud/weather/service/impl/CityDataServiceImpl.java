@@ -5,8 +5,10 @@ import com.waylau.spring.cloud.weather.util.XmlBuilder;
 import com.waylau.spring.cloud.weather.vo.City;
 import com.waylau.spring.cloud.weather.vo.CityList;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
+import javax.xml.bind.JAXBException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,7 @@ public class CityDataServiceImpl implements CityDataService {
    * @throws Exception
    */
   @Override
-  public List<City> listCity() throws Exception {
+  public List<City> listCity() throws JAXBException, IOException {
     // 读取xml文件
     Resource resource = new ClassPathResource("citylist.xml");
     BufferedReader br = new BufferedReader(
