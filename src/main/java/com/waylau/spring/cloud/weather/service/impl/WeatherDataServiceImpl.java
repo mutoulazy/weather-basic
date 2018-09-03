@@ -49,6 +49,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 		this.saveWeatherData(uri);
 	}
 
+	@Override
+	public void syncDateByCityName(String cityName) {
+		String uri = WEATHER_URI + "city=" + cityName;
+		this.saveWeatherData(uri);
+	}
+
 	/**
 	 * 通过url从天气接口获取天气json数据，并添加本地缓存
 	 * @param uri

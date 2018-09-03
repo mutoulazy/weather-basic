@@ -31,5 +31,12 @@ public interface WeatherDataService {
 	 * @param cityId
 	 */
 	void syncDateByCityId(String cityId);
+
+
+	/**
+	 * 根据城市名称来同步天气
+	 * @param cityName
+	 */
+	void syncDateByCityName(String cityName);
 	
 }

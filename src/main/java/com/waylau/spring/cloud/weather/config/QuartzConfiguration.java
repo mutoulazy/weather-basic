@@ -27,6 +27,7 @@ public class QuartzConfiguration {
 
   /**
    * 天气任务的Trigger
+   * 每半个小时执行一次查询xml列表中的城市天气
    * @return
    */
   @Bean

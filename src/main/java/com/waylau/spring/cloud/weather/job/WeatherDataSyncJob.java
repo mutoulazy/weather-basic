@@ -6,12 +6,12 @@ import com.waylau.spring.cloud.weather.vo.City;
 import java.io.IOException;
 import java.util.List;
 import javax.xml.bind.JAXBException;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
 /**
  * 天气数据定时更新任务
@@ -34,11 +34,11 @@ public class WeatherDataSyncJob extends QuartzJobBean {
     } catch (JAXBException e) {
       logger.error("json文件转换错误", e);
     }
-    // 遍历城市ID获取天气
+    // 遍历城市名称缓存天气数据
     for (City city : cityList) {
-      String cityId = city.getCityId();
-      logger.debug("WeatherDataSyncJob: cityId="+cityId);
-      weatherDataService.syncDateByCityId(cityId);
+      String cityName = city.getCityName();
+      logger.debug("WeatherDataSyncJob: cityName==="+cityName);
+      weatherDataService.syncDateByCityName(cityName);
     }
 
     logger.debug("WeatherDataSyncJob Done!!!");
