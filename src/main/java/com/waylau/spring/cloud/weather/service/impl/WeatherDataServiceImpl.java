@@ -1,5 +1,6 @@
-package com.waylau.spring.cloud.weather.service;
+package com.waylau.spring.cloud.weather.service.impl;
 
+import com.waylau.spring.cloud.weather.service.WeatherDataService;
 import java.io.IOException;
 
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,12 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 		return this.doGetWeahter(uri);
 	}
 
+	@Override
+	public void syncDateByCityId(String cityId) {
+		String uri = WEATHER_URI + "citykey=" + cityId;
+		this.saveWeatherData(uri);
+	}
+
 	/**
 	 * 通过url从天气接口获取天气json数据，并添加本地缓存
 	 * @param uri
@@ -78,6 +85,26 @@ public class WeatherDataServiceImpl implements WeatherDataService {
 		}
 		
 		return resp;
+	}
+
+	/**
+	 * 把天气数据存入到redis缓存
+	 * @param uri
+	 */
+	private void saveWeatherData(String uri) {
+		String key = uri;
+		String strBody = null;
+		ValueOperations<String, String>  ops = stringRedisTemplate.opsForValue();
+
+		// 调用服务接口来获取
+		ResponseEntity<String> respString = restTemplate.getForEntity(uri, String.class);
+
+		if (respString.getStatusCodeValue() == 200) {
+			strBody = respString.getBody();
+		}
+
+		// 数据写入缓存
+		ops.set(key, strBody, TIME_OUT, TimeUnit.SECONDS);
 	}
 
 }
