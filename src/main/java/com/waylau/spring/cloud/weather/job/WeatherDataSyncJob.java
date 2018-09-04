@@ -34,11 +34,15 @@ public class WeatherDataSyncJob extends QuartzJobBean {
     } catch (JAXBException e) {
       logger.error("json文件转换错误", e);
     }
-    // 遍历城市名称缓存天气数据
-    for (City city : cityList) {
-      String cityName = city.getCityName();
-      logger.debug("WeatherDataSyncJob: cityName==="+cityName);
-      weatherDataService.syncDateByCityName(cityName);
+    if (cityList != null) {
+      // 遍历城市名称缓存天气数据
+      for (City city : cityList) {
+        String cityName = city.getCityName();
+        logger.debug("WeatherDataSyncJob: cityName==="+cityName);
+        weatherDataService.syncDateByCityName(cityName);
+      }
+    } else {
+      logger.warn("cityList为空，未从xml文件中获取有效的城市列表");
     }
 
     logger.debug("WeatherDataSyncJob Done!!!");
