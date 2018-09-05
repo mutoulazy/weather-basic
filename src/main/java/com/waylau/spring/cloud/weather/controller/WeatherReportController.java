@@ -30,7 +30,7 @@ public class WeatherReportController {
   @ApiImplicitParam(name = "cityId", value = "城市Id", required = true, paramType = "path", dataType = "String")
   @GetMapping("/cityId/{cityId}")
   public ModelAndView getReportByCityId(@PathVariable("cityId") String cityId, Model model) throws Exception {
-    model.addAttribute("title", "老卫的天气预报");
+    model.addAttribute("title", "天气预报");
     model.addAttribute("cityId", cityId);
     model.addAttribute("cityList", cityDataService.listCity());
     model.addAttribute("report", weatherReportService.getDataByCityId(cityId));
